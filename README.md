@@ -12,4 +12,6 @@ Instructions
 Notes:
 
 	The program must be run with root privileges.
+	The program has not yet been tested on the Raspberry Pi.
+	The current state is experimental. Full functionality will be added soon.
 
