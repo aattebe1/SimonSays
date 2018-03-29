@@ -8,21 +8,13 @@
 //
 //=======================================================================================
 
-public class LEDGame : Sequence{
-	
-	/* Private Constants */
-	private const int SWITCH_1 = 0x0D; // PIN33
-	private const int SWITCH_2 = 0x13; // PIN35
-	private const int SWITCH_3 = 0x10; // PIN36
-	private const int LED_1 = 0x1A;    // PIN37
-	private const int LED_2 = 0x14;    // PIN38
-	private const int LED_3 = 0x15;    // PIN40
-	private const int OFF = 0x01;      // 5V
-	private const int ON = 0x00;       // 0V
-	
+public class LEDGame : Sequence
+{
 	/* Private Data Fields */
-	private int round;     // Current round
-	private byte switches; // Number of switches used in the game
+	private int switch1, switch2, switch3; // Switch Pins
+	private int led1, led2, led3;          // LED pins
+	private int on, off;                   // ON/OFF Values
+	private byte switches;                 // Number of switches
 	
 	
 	//-----------------------------------------------------------------------------------
@@ -35,12 +27,14 @@ public class LEDGame : Sequence{
 	public LEDGame()
 		: base(10)
 	{
+		/* Assign switch and LED variables */
+		this.SetDefaults();
+		
 		/* Initialize GPIO */
 		InitializeIO();
 		
-		/* Assign switches & start round at 0 */
+		/* Set number of switches */
 		this.switches = 3;
-		this.round = 0;
 	}
 	
 	
@@ -54,25 +48,50 @@ public class LEDGame : Sequence{
 	public LEDGame(int arrayLength, byte switches)
 		: base(arrayLength)
 	{
+		/* Assign switch and LED variables */
+		this.SetDefaults();
+		
 		/* Initialize GPIO */
 		InitializeIO();
 		
-		/* Assign switches, default to 1 or 3 if number outside of range is entered */
+		/* Set number of switches */
 		if (switches < 2)
 		{
 			this.switches = 1;
-		}
-		else if (switches == 2)
-		{
-			this.switches = 2;
 		}
 		else
 		{
 			this.switches = 3;
 		}
+	}
+	
+	
+	//-----------------------------------------------------------------------------------
+	//  LED Game method - The overloaded constructor method for the class. Instantiates
+	//                    the parent class with a specified value. Sets the number of
+	//                    switches to the specified value. Assigns pins and on/off values
+	//                    to the specified values.
+	//       params:  int, byte, int array
+	//       return:  none
+	//-----------------------------------------------------------------------------------
+	public LEDGame(int arrayLength, byte switches, int[] pinSettings)
+		: base(arrayLength)
+	{
+		/* Assign switch and LED variables */
+		this.SetPins(pinSettings);
 		
-		/* Start round at 0 */
-		this.round = 0;
+		/* Initialize GPIO */
+		InitializeIO();
+		
+		/* Set number of switches */
+		if (switches < 2)
+		{
+			this.switches = 1;
+		}
+		else
+		{
+			this.switches = 3;
+		}
 	}
 	
 	
@@ -83,132 +102,108 @@ public class LEDGame : Sequence{
 	//-----------------------------------------------------------------------------------
 	private void InitializeIO()
 	{
+		/* Run setup */
 		WiringPi.Init.WiringPiSetupGpio();
-		WiringPi.GPIO.pinMode(SWITCH_1, WiringPi.GPIO.INPUT);
-		WiringPi.GPIO.pinMode(SWITCH_2, WiringPi.GPIO.INPUT);
-		WiringPi.GPIO.pinMode(SWITCH_3, WiringPi.GPIO.INPUT);
-		WiringPi.GPIO.pinMode(LED_1, WiringPi.GPIO.OUTPUT);
-		WiringPi.GPIO.pinMode(LED_2, WiringPi.GPIO.OUTPUT);
-		WiringPi.GPIO.pinMode(LED_3, WiringPi.GPIO.OUTPUT);
+		
+		/* Setup pins */
+		WiringPi.GPIO.pinMode(this.switch1, WiringPi.GPIO.INPUT);
+		WiringPi.GPIO.pinMode(this.switch2, WiringPi.GPIO.INPUT);
+		WiringPi.GPIO.pinMode(this.switch3, WiringPi.GPIO.INPUT);
+		WiringPi.GPIO.pinMode(this.led1, WiringPi.GPIO.OUTPUT);
+		WiringPi.GPIO.pinMode(this.led2, WiringPi.GPIO.OUTPUT);
+		WiringPi.GPIO.pinMode(this.led3, WiringPi.GPIO.OUTPUT);
+		
+		/* Initialize pins to off state */
+		WiringPi.GPIO.digitalWrite(this.led1, this.off);
+		WiringPi.GPIO.digitalWrite(this.led2, this.off);
+		WiringPi.GPIO.digitalWrite(this.led3, this.off);
 	}
 	
 	
 	//-----------------------------------------------------------------------------------
 	//  LED Pattern method - Controls the current LED pattern for the sequence.
-	//       params:  none
+	//       params:  int
 	//       return:  none
 	//-----------------------------------------------------------------------------------
-	public void LEDPattern()
+	public void LEDPattern(int round)
 	{
 		/* Loop through current pattern */
-		for (int i = 0; i < base.getSequence(this.round).Length; i++)
+		for (int i = 0; i < base.getSequence(round).Length; i++)
 		{
 			/* Determine which LED is active */
-			if (base.getSequence(this.round)[i] == 1)
+			if (base.getSequence(round)[i] == 1)
 			{
-				WiringPi.GPIO.digitalWrite(LED_1, ON); // Turn on LED
+				WiringPi.GPIO.digitalWrite(this.led1, this.on); // Turn on LED
 			}
-			else if (base.getSequence(this.round)[i] == 2)
+			else if (base.getSequence(round)[i] == 2)
 			{
-				WiringPi.GPIO.digitalWrite(LED_2, ON);  // Turn on LED
+				WiringPi.GPIO.digitalWrite(this.led2, this.on);  // Turn on LED
 			}
 			else
 			{
-				WiringPi.GPIO.digitalWrite(LED_3, ON);    // Turn on LED
+				WiringPi.GPIO.digitalWrite(this.led3, this.on);    // Turn on LED
 			}
 			
 			/* Delay */
 			try
 			{
-				WiringPi.Timing.delay((uint)(System.Math.Abs(10 - i) * 200));
+				WiringPi.Timing.delay((uint)(System.Math.Abs(10 - round) * 100));
 			}
 			catch (System.OverflowException)
 			{}
 			
 			/* Turn off LEDs */
-			WiringPi.GPIO.digitalWrite(LED_1, OFF);
-			WiringPi.GPIO.digitalWrite(LED_1, OFF);
-			WiringPi.GPIO.digitalWrite(LED_1, OFF);
+			WiringPi.GPIO.digitalWrite(this.led1, this.off);
+			WiringPi.GPIO.digitalWrite(this.led2, this.off);
+			WiringPi.GPIO.digitalWrite(this.led3, this.off);
+			
+			/* Delay */
+			try
+			{
+				WiringPi.Timing.delay((uint)(System.Math.Abs(10 - round) * 100));
+			}
+			catch (System.OverflowException)
+			{}
 		}
 	}
 	
 	
 	//-----------------------------------------------------------------------------------
 	//  Check Input method - Checks the input from the switch(es)
-	//       params:  none
-	//       return:  boolean
+	//       params:  int, boolean pointer, byte pointer
+	//       return:  none
 	//-----------------------------------------------------------------------------------
-	public bool CheckInput()
+	public void CheckInput(int round, ref bool correctInput, ref byte switchPressed)
 	{
-		bool correctInput = true;
-		byte switchPressed = 0;
-		byte[] currentRound = base.getSequence(this.round);
+		byte[] currentRound = base.getSequence(round);
 		
-		/* Loop through current pattern */
-		for (int i = 0; i < currentRound.Length; i++)
+		switch (this.switches)
 		{
-			/* Wait for switch push */
-			while(switchPressed == 0)
-			{
-				if (WiringPi.GPIO.digitalRead(SWITCH_1) == ON)
-				{
-					switchPressed = 1; // Switch 1 pressed
-				}
-				else if (WiringPi.GPIO.digitalRead(SWITCH_2) == ON)
-				{
-					switchPressed = 2; // Switch 2 pressed
-				}
-				else if (WiringPi.GPIO.digitalRead(SWITCH_3) == ON)
-				{
-					switchPressed = 3; // Switch 3 pressed
-				}
-			}
+			case 1:
 			
-			/* Determine the number of switches */
-			if (this.switches == 1)
-			{
-				break; // Any switch is correct, exit loop
-			}
-			else if (this.switches == 2)
-			{
-				/* Determine if switch is correct (any switch is correct for 3rd LED) */
-				if ((currentRound[i] == 1) && (switchPressed != 1))
+				while (!correctInput)
 				{
-					correctInput = false; // Wrong switch
-					break;                // Exit loop
+					/* Reset the number of the pressed switch */
+					switchPressed = 0;
+					
+					/* Wait for switch push */
+					while (switchPressed == 0)
+					{
+						/* Check for switch press */
+						if (WiringPi.GPIO.digitalRead(this.switch1) == this.on)
+						{
+							switchPressed = 1;   // Switch 1 pressed
+							correctInput = true; // Correct input received
+						}
+					}
 				}
-				else if ((currentRound[i] == 2) && (switchPressed != 2))
-				{
-					correctInput = false; // Wrong switch
-					break;                // Exit loop
-				}
-			}
-			else
-			{
-				/* Determine if switch is correct */
-				if ((currentRound[i] == 1) && (switchPressed != 1))
-				{
-					correctInput = false; // Wrong switch
-					break;                // Exit loop
-				}
-				else if ((currentRound[i] == 2) && (switchPressed != 2))
-				{
-					correctInput = false; // Wrong switch
-					break;                // Exit loop
-				}
-				else if ((currentRound[i] == 3) && (switchPressed != 3))
-				{
-					correctInput = false; // Wrong switch
-					break;                // Exit loop
-				}
-			}
+				
+				break;
+			
+			default:
+				
+			break;
 		}
-		
-		/* Go to next round */
-		this.round++;
-		
-		/* Return true if the correct input was entered, false otherwise */
-		return correctInput;
 	}
 	
 	//-----------------------------------------------------------------------------------
@@ -268,5 +263,58 @@ public class LEDGame : Sequence{
 		}
 		
 		System.Console.ResetColor();
+	}
+	
+	
+	//-----------------------------------------------------------------------------------
+	//  Set Defaults method - Sets the default pin numbers if to use if no pin numbers
+	//                        were specified by the user
+	//       params:  none
+	//       return:  none
+	//-----------------------------------------------------------------------------------
+	private void SetDefaults()
+	{
+		this.switch1 = 0x0D;
+		this.switch2 = 0x13;
+		this.switch3 = 0x10;
+		this.led1 = 0x1A;
+		this.led2 = 0x14;
+		this.led3 = 0x15;
+		this.off = 0x01;
+		this.on = 0x00;
+	}
+	
+	
+	//-----------------------------------------------------------------------------------
+	//  Set Pins method - Sets the default pin numbers if to use if no pin numbers
+	//                        were specified by the user
+	//       params:  int array
+	//       return:  none
+	//-----------------------------------------------------------------------------------
+	private void SetPins(int[] pinSettings)
+	{
+		/* Assign pin numbers */
+		try
+		{
+			this.switch1 = pinSettings[0];
+			this.switch2 = pinSettings[1];
+			this.switch3 = pinSettings[2];
+			this.led1 = pinSettings[3];
+			this.led2 = pinSettings[4];
+			this.led3 = pinSettings[5];
+			this.off = pinSettings[6];
+			this.on = pinSettings[7];
+		}
+		catch (System.IndexOutOfRangeException)
+		{
+			this.switch1 = 0x0D;
+			this.switch2 = 0x13;
+			this.switch3 = 0x10;
+			this.led1 = 0x1A;
+			this.led2 = 0x14;
+			this.led3 = 0x15;
+			this.off = 0x01;
+			this.on = 0x00;
+		}
 	}
 }
