@@ -22,3 +22,8 @@ Notes:
 	• The program must be run with root privileges.
 	• Only one-button mode functionality is complete at this time. One-button mode has been tested on the Raspberry Pi. Three-button mode will be added soon.
 
+
+Pin Numbering Explanation:
+
+	The pin numbering is based on the Raspberry Pi 3 Version B+ 40 pin GPIO port. See the pin numbering file for a diagram of the pin assignments used in this program. To determine your Pi's specific pin numbers, use the command 'gpio readall'. The numbers listed in the BCM column are used for assigning pins in the program.
+
