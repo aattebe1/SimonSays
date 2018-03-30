@@ -77,22 +77,6 @@ public class SimonSays
 			
 			/* Check input */
 			newGame.CheckInput(i, ref correctInput, ref switchPressed);
-			
-			//while(!correctInput)
-			//{
-				/* Reset the number of the pressed switch */
-				//switchPressed = 0;
-				
-				/* Wait for switch push */
-				/*while (switchPressed == 0)
-				{
-					if (WiringPi.GPIO.digitalRead(SWITCH_1) == ON)
-					{
-						switchPressed = 1; // Switch 1 pressed
-						correctInput = true;
-					}
-				}*/
-			//}
 		}
 	}
 }
