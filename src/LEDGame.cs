@@ -130,6 +130,18 @@ public class LEDGame : Sequence
 		/* Loop through current pattern */
 		for (int i = 0; i < base.getSequence(round).Length; i++)
 		{
+			/* Check for first round */
+			if (round != 1)
+			{
+				/* Delay if not first round */
+				try
+				{
+					WiringPi.Timing.delay(500);
+				}
+				catch (System.OverflowException)
+				{}
+			}
+			
 			/* Determine which LED is active */
 			if (base.getSequence(round)[i] == 1)
 			{
@@ -157,13 +169,17 @@ public class LEDGame : Sequence
 			WiringPi.GPIO.digitalWrite(this.led2, this.off);
 			WiringPi.GPIO.digitalWrite(this.led3, this.off);
 			
-			/* Delay */
-			try
+			/* Check for end of pattern */
+			if ((i + 1) < base.getSequence(round).Length)
 			{
-				WiringPi.Timing.delay((uint)(System.Math.Abs(10 - round) * 100));
+				/* Delay if not end of pattern */
+				try
+				{
+					WiringPi.Timing.delay((uint)(System.Math.Abs(10 - round) * 100));
+				}
+				catch (System.OverflowException)
+				{}
 			}
-			catch (System.OverflowException)
-			{}
 		}
 	}
 	
