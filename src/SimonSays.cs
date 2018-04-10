@@ -23,6 +23,7 @@ public class SimonSays
 	private const int LED_1 = 0x1A;    // PIN37
 	private const int LED_2 = 0x14;    // PIN38
 	private const int LED_3 = 0x15;    // PIN40
+	private const int SPEAKER = 0x0C;  // PIN32
 	private const int OFF = 0x01;      // 3.3V
 	private const int ON = 0x00;       // 0V
 	
@@ -50,6 +51,7 @@ public class SimonSays
 				LED_1,
 				LED_2,
 				LED_3,
+				SPEAKER,
 				OFF,
 				ON
 			});
