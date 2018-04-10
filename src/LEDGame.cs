@@ -10,9 +10,16 @@
 
 public class LEDGame : Sequence
 {
+	/* Constants */
+	private const int GSHARP = 208;
+	private const int CNATURAL = 262;
+	private const int DSHARP = 311;
+	
+	
 	/* Private Data Fields */
 	private int switch1, switch2, switch3; // Switch Pins
 	private int led1, led2, led3;          // LED pins
+	private int speaker;                   // Speaker pin
 	private int on, off;                   // ON/OFF Values
 	private byte switches;                 // Number of switches
 	
@@ -112,6 +119,7 @@ public class LEDGame : Sequence
 		WiringPi.GPIO.pinMode(this.led1, WiringPi.GPIO.OUTPUT);
 		WiringPi.GPIO.pinMode(this.led2, WiringPi.GPIO.OUTPUT);
 		WiringPi.GPIO.pinMode(this.led3, WiringPi.GPIO.OUTPUT);
+		SoftwareTones.Tones.SoftToneCreate(this.speaker);
 		
 		/* Initialize pins to off state */
 		WiringPi.GPIO.digitalWrite(this.led1, this.off);
@@ -156,6 +164,9 @@ public class LEDGame : Sequence
 				WiringPi.GPIO.digitalWrite(this.led3, this.on);    // Turn on LED
 			}
 			
+			/* Play note */
+			PlayNote(base.getSequence(round)[i]);
+			
 			/* Delay */
 			try
 			{
@@ -163,6 +174,9 @@ public class LEDGame : Sequence
 			}
 			catch (System.OverflowException)
 			{}
+			
+			/* Stop note */
+			StopNote();
 			
 			/* Turn off LEDs */
 			WiringPi.GPIO.digitalWrite(this.led1, this.off);
@@ -181,6 +195,40 @@ public class LEDGame : Sequence
 				{}
 			}
 		}
+	}
+	
+	
+	//-----------------------------------------------------------------------------------
+	//  Play Note method - Plays the note that corresponds to the active LED
+	//       params:  byte
+	//       return:  none
+	//-----------------------------------------------------------------------------------
+	private void PlayNote(byte sequence)
+	{
+		/* Determine which note to play */
+		if (sequence == 1)
+		{
+			SoftwareTones.Tones.SoftToneWrite(this.speaker, CNATURAL);
+		}
+		else if (sequence == 2)
+		{
+			SoftwareTones.Tones.SoftToneWrite(this.speaker, DSHARP);
+		}
+		else
+		{
+			SoftwareTones.Tones.SoftToneWrite(this.speaker, GSHARP);
+		}
+	}
+	
+	
+	//-----------------------------------------------------------------------------------
+	//  Stop Note method - Turns off the speaker (stops playing note)
+	//       params:  none
+	//       return:  none
+	//-----------------------------------------------------------------------------------
+	private void StopNote()
+	{
+		SoftwareTones.Tones.SoftToneWrite(this.speaker, 0);
 	}
 	
 	
@@ -296,6 +344,7 @@ public class LEDGame : Sequence
 		this.led1 = 0x1A;
 		this.led2 = 0x14;
 		this.led3 = 0x15;
+		this.speaker = 0x0C;
 		this.off = 0x01;
 		this.on = 0x00;
 	}
@@ -318,8 +367,9 @@ public class LEDGame : Sequence
 			this.led1 = pinSettings[3];
 			this.led2 = pinSettings[4];
 			this.led3 = pinSettings[5];
-			this.off = pinSettings[6];
-			this.on = pinSettings[7];
+			this.speaker = pinSettings[6];
+			this.off = pinSettings[7];
+			this.on = pinSettings[8];
 		}
 		catch (System.IndexOutOfRangeException)
 		{
@@ -329,6 +379,7 @@ public class LEDGame : Sequence
 			this.led1 = 0x1A;
 			this.led2 = 0x14;
 			this.led3 = 0x15;
+			this.speaker = 0x0C;
 			this.off = 0x01;
 			this.on = 0x00;
 		}
