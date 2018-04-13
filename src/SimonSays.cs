@@ -12,6 +12,7 @@
 //=======================================================================================
 
 using System;
+using System.Threading;
 using WiringPi;
 
 public class SimonSays
@@ -35,14 +36,11 @@ public class SimonSays
 	//-----------------------------------------------------------------------------------
 	public static void Main(String[] args)
 	{
-		/* Save the number of the last switch pressed */
-		byte switchPressed = 0;
-		
 		/* Variable declaration section */
 		bool correctInput = false;
 		
 		/* Create an LEDGame object */
-		LEDGame newGame = new LEDGame(10, 1,
+		LEDGame newGame = new LEDGame(10, 3,
 			new int[]
 			{
 				SWITCH_1,
@@ -69,16 +67,33 @@ public class SimonSays
 			newGame.CheatMode(false);
 		}
 		
+		/* Loop through game rounds */
 		for (int i = 0; i < newGame.Length(); i++)
 		{
 			/* Reset input checking variable */
-			correctInput = false;
+			//correctInput = false;
 			
 			/* Display the LED pattern */
 			newGame.LEDPattern(i);
 			
 			/* Check input */
-			newGame.CheckInput(i, ref correctInput, ref switchPressed);
+			correctInput = newGame.CheckInput(i);
+			
+			/* Check for correct input */
+			if (!correctInput)
+			{
+				break; // Exit loop on incorrect input
+			}
+		}
+		
+		/* Check for successful game completion */
+		if (!correctInput)
+		{
+			newGame.Loss();
+		}
+		else
+		{
+			newGame.Win();
 		}
 	}
 }

@@ -22,6 +22,7 @@ public class LEDGame : Sequence
 	private int speaker;                   // Speaker pin
 	private int on, off;                   // ON/OFF Values
 	private byte switches;                 // Number of switches
+	private byte switchPressed;            // Number of pressed switch
 	
 	
 	//-----------------------------------------------------------------------------------
@@ -35,13 +36,16 @@ public class LEDGame : Sequence
 		: base(10)
 	{
 		/* Assign switch and LED variables */
-		this.SetDefaults();
+		SetDefaults();
 		
 		/* Initialize GPIO */
 		InitializeIO();
 		
 		/* Set number of switches */
-		this.switches = 3;
+		switches = 3;
+		
+		/* Initialize data fields */
+		switchPressed = 0;
 	}
 	
 	
@@ -52,24 +56,27 @@ public class LEDGame : Sequence
 	//       params:  int, byte
 	//       return:  none
 	//-----------------------------------------------------------------------------------
-	public LEDGame(int arrayLength, byte switches)
+	public LEDGame(int arrayLength, byte numSwitches)
 		: base(arrayLength)
 	{
 		/* Assign switch and LED variables */
-		this.SetDefaults();
+		SetDefaults();
 		
 		/* Initialize GPIO */
 		InitializeIO();
 		
 		/* Set number of switches */
-		if (switches < 2)
+		if (numSwitches < 2)
 		{
-			this.switches = 1;
+			switches = 1;
 		}
 		else
 		{
-			this.switches = 3;
+			switches = 3;
 		}
+		
+		/* Initialize data fields */
+		switchPressed = 0;
 	}
 	
 	
@@ -81,24 +88,27 @@ public class LEDGame : Sequence
 	//       params:  int, byte, int array
 	//       return:  none
 	//-----------------------------------------------------------------------------------
-	public LEDGame(int arrayLength, byte switches, int[] pinSettings)
+	public LEDGame(int arrayLength, byte numSwitches, int[] pinSettings)
 		: base(arrayLength)
 	{
 		/* Assign switch and LED variables */
-		this.SetPins(pinSettings);
+		SetPins(pinSettings);
 		
 		/* Initialize GPIO */
 		InitializeIO();
 		
 		/* Set number of switches */
-		if (switches < 2)
+		if (numSwitches < 2)
 		{
-			this.switches = 1;
+			switches = 1;
 		}
 		else
 		{
-			this.switches = 3;
+			switches = 3;
 		}
+		
+		/* Initialize data fields */
+		switchPressed = 0;
 	}
 	
 	
@@ -113,18 +123,18 @@ public class LEDGame : Sequence
 		WiringPi.Init.WiringPiSetupGpio();
 		
 		/* Setup pins */
-		WiringPi.GPIO.pinMode(this.switch1, WiringPi.GPIO.INPUT);
-		WiringPi.GPIO.pinMode(this.switch2, WiringPi.GPIO.INPUT);
-		WiringPi.GPIO.pinMode(this.switch3, WiringPi.GPIO.INPUT);
-		WiringPi.GPIO.pinMode(this.led1, WiringPi.GPIO.OUTPUT);
-		WiringPi.GPIO.pinMode(this.led2, WiringPi.GPIO.OUTPUT);
-		WiringPi.GPIO.pinMode(this.led3, WiringPi.GPIO.OUTPUT);
-		SoftwareTones.Tones.SoftToneCreate(this.speaker);
+		WiringPi.GPIO.pinMode(switch1, WiringPi.GPIO.INPUT);
+		WiringPi.GPIO.pinMode(switch2, WiringPi.GPIO.INPUT);
+		WiringPi.GPIO.pinMode(switch3, WiringPi.GPIO.INPUT);
+		WiringPi.GPIO.pinMode(led1, WiringPi.GPIO.OUTPUT);
+		WiringPi.GPIO.pinMode(led2, WiringPi.GPIO.OUTPUT);
+		WiringPi.GPIO.pinMode(led3, WiringPi.GPIO.OUTPUT);
+		SoftwareTones.Tones.SoftToneCreate(speaker);
 		
 		/* Initialize pins to off state */
-		WiringPi.GPIO.digitalWrite(this.led1, this.off);
-		WiringPi.GPIO.digitalWrite(this.led2, this.off);
-		WiringPi.GPIO.digitalWrite(this.led3, this.off);
+		WiringPi.GPIO.digitalWrite(led1, off);
+		WiringPi.GPIO.digitalWrite(led2, off);
+		WiringPi.GPIO.digitalWrite(led3, off);
 	}
 	
 	
@@ -139,7 +149,7 @@ public class LEDGame : Sequence
 		for (int i = 0; i < base.getSequence(round).Length; i++)
 		{
 			/* Check for first round */
-			if (round != 1)
+			if (round != 0)
 			{
 				/* Delay if not first round */
 				try
@@ -153,15 +163,15 @@ public class LEDGame : Sequence
 			/* Determine which LED is active */
 			if (base.getSequence(round)[i] == 1)
 			{
-				WiringPi.GPIO.digitalWrite(this.led1, this.on); // Turn on LED
+				WiringPi.GPIO.digitalWrite(led1, on); // Turn on LED
 			}
 			else if (base.getSequence(round)[i] == 2)
 			{
-				WiringPi.GPIO.digitalWrite(this.led2, this.on);  // Turn on LED
+				WiringPi.GPIO.digitalWrite(led2, on); // Turn on LED
 			}
 			else
 			{
-				WiringPi.GPIO.digitalWrite(this.led3, this.on);    // Turn on LED
+				WiringPi.GPIO.digitalWrite(led3, on); // Turn on LED
 			}
 			
 			/* Play note */
@@ -179,9 +189,9 @@ public class LEDGame : Sequence
 			StopNote();
 			
 			/* Turn off LEDs */
-			WiringPi.GPIO.digitalWrite(this.led1, this.off);
-			WiringPi.GPIO.digitalWrite(this.led2, this.off);
-			WiringPi.GPIO.digitalWrite(this.led3, this.off);
+			WiringPi.GPIO.digitalWrite(led1, off);
+			WiringPi.GPIO.digitalWrite(led2, off);
+			WiringPi.GPIO.digitalWrite(led3, off);
 			
 			/* Check for end of pattern */
 			if ((i + 1) < base.getSequence(round).Length)
@@ -208,15 +218,15 @@ public class LEDGame : Sequence
 		/* Determine which note to play */
 		if (sequence == 1)
 		{
-			SoftwareTones.Tones.SoftToneWrite(this.speaker, CNATURAL);
+			SoftwareTones.Tones.SoftToneWrite(speaker, CNATURAL);
 		}
 		else if (sequence == 2)
 		{
-			SoftwareTones.Tones.SoftToneWrite(this.speaker, DSHARP);
+			SoftwareTones.Tones.SoftToneWrite(speaker, DSHARP);
 		}
 		else
 		{
-			SoftwareTones.Tones.SoftToneWrite(this.speaker, GSHARP);
+			SoftwareTones.Tones.SoftToneWrite(speaker, GSHARP);
 		}
 	}
 	
@@ -228,46 +238,124 @@ public class LEDGame : Sequence
 	//-----------------------------------------------------------------------------------
 	private void StopNote()
 	{
-		SoftwareTones.Tones.SoftToneWrite(this.speaker, 0);
+		SoftwareTones.Tones.SoftToneWrite(speaker, 0);
 	}
 	
 	
 	//-----------------------------------------------------------------------------------
 	//  Check Input method - Checks the input from the switch(es)
-	//       params:  int, boolean pointer, byte pointer
-	//       return:  none
+	//       params:  int
+	//       return:  boolean
 	//-----------------------------------------------------------------------------------
-	public void CheckInput(int round, ref bool correctInput, ref byte switchPressed)
-	{
-		byte[] currentRound = base.getSequence(round);
-		
-		switch (this.switches)
-		{
-			case 1:
-			
-				while (!correctInput)
+	public bool CheckInput(int round)
+	{	
+		for (int i = 0; i < base.getSequence(round).Length; i++)
+		{	
+			/* Wait for switch push */
+			do
+			{
+				/* Create debounce variable */
+				int debounce = 0;
+				
+				/* Reset switchPressed */
+				switchPressed = 0;
+				
+				/* Check switch 1 */
+				while (WiringPi.GPIO.digitalRead(switch1) == on)
 				{
-					/* Reset the number of the pressed switch */
-					switchPressed = 0;
+					/* Increase debounce */
+					debounce++;
 					
-					/* Wait for switch push */
-					while (switchPressed == 0)
+					/* Check debounce */
+					if ((debounce >= 200) && (switchPressed == 0))
 					{
-						/* Check for switch press */
-						if (WiringPi.GPIO.digitalRead(this.switch1) == this.on)
-						{
-							switchPressed = 1;   // Switch 1 pressed
-							correctInput = true; // Correct input received
-						}
+						/* Set switchPressed */
+						switchPressed = 1;
+
+						/* Turn on LED */
+						WiringPi.GPIO.digitalWrite(led1, on);
+						
+						/* Play note */
+						PlayNote(1);
 					}
 				}
 				
-				break;
-			
-			default:
+				/* Check switch 2 */
+				while (WiringPi.GPIO.digitalRead(switch2) == on)
+				{
+					/* Increase debounce */
+					debounce++;
+					
+					/* Check debounce */
+					if ((debounce >= 200) && (switchPressed == 0))
+					{
+						/* Turn on LED */
+						WiringPi.GPIO.digitalWrite(led2, on);
+						
+						/* Play note */
+						PlayNote(2);
+						
+						/* Set switchPressed */
+						switchPressed = 2;
+					}
+				}
 				
-			break;
+				/* Check switch 3 */
+				while (WiringPi.GPIO.digitalRead(switch3) == on)
+				{
+					/* Increase debounce */
+					debounce++;
+					
+					/* Check debounce */
+					if ((debounce >= 200) && (switchPressed == 0))
+					{
+						/* Turn on LED */
+						WiringPi.GPIO.digitalWrite(led3, on);
+						
+						/* Play note */
+						PlayNote(3);
+						
+						/* Set switchPressed */
+						switchPressed = 3;
+					}
+				}
+				
+				/* Stop Note */
+				StopNote();
+				
+				/* Turn off LEDs */
+				WiringPi.GPIO.digitalWrite(led1, off);
+				WiringPi.GPIO.digitalWrite(led2, off);
+				WiringPi.GPIO.digitalWrite(led3, off);
+				
+				if (switchPressed == 1)
+				{
+					if (base.getSequence(round)[i] != 1)
+					{
+						System.Console.WriteLine("Wrong Input, Expecting Switch {0}, Switch {1} Pressed", base.getSequence(round)[i], switchPressed);
+						return false; // Wrong input
+					}
+				}
+				else if (switchPressed == 2)
+				{
+					if (base.getSequence(round)[i] != 2)
+					{
+						System.Console.WriteLine("Wrong Input, Expecting Switch {0}, Switch {1} Pressed", base.getSequence(round)[i], switchPressed);
+						return false; // Wrong input
+					}
+				}
+				else if (switchPressed == 3)
+				{
+					if (base.getSequence(round)[i] != 3)
+					{
+						System.Console.WriteLine("Wrong Input, Expecting Switch {0}, Switch {1} Pressed", base.getSequence(round)[i], switchPressed);
+						return false; // Wrong input
+					}
+				}
+			} while (switchPressed == 0);
 		}
+
+		return true;
 	}
 	
 	//-----------------------------------------------------------------------------------
@@ -279,16 +367,16 @@ public class LEDGame : Sequence
 	//-----------------------------------------------------------------------------------
 	public void CheatMode(bool onOff)
 	{
-		System.Console.ForegroundColor = System.ConsoleColor.Cyan;                      // Change text color
+		System.Console.ForegroundColor = System.ConsoleColor.Cyan;                  // Change text color
 		
 		/* Display the number of switches */
-		if (this.switches == 1)
+		if (switches == 1)
 		{
 			System.Console.Write("\n\n1 Switch Mode\n");
 		}
 		else
 		{
-			System.Console.Write("\n\n{0} Switches Mode\n", this.switches);
+			System.Console.Write("\n\n{0} Switches Mode\n", switches);
 		}
 		
 		/* Determine cheatmode status */
@@ -303,22 +391,23 @@ public class LEDGame : Sequence
 					/* Print the sequences to the console */
 					if (base.getSequence(i)[j] == 1)
 					{
-						System.Console.ForegroundColor = System.ConsoleColor.Yellow;    // Set to LED color
-						System.Console.Write("{0} ", base.getSequence(i)[j]);
+						System.Console.ForegroundColor = System.ConsoleColor.Red;   // Set to LED color
+						System.Console.Write("Red ");
 					}
 					else if (base.getSequence(i)[j] == 2)
 					{
-						System.Console.ForegroundColor = System.ConsoleColor.Green;     // Set to LED color
-						System.Console.Write("{0} ", base.getSequence(i)[j]);
+						System.Console.ForegroundColor = System.ConsoleColor.Blue;  // Set to LED color
+						System.Console.Write("Blue ");
 					}
 					else
 					{
-						System.Console.ForegroundColor = System.ConsoleColor.Red;       // Set to LED color
-						System.Console.Write("{0} ", base.getSequence(i)[j]);
+						System.Console.ForegroundColor = System.ConsoleColor.Green; // Set to LED color
+						System.Console.Write("Green ");
 					}
-					
-					System.Console.Write("\n");                                         // Go to next line
 				}
+				
+				/* Go to next line */
+				System.Console.Write("\n");
 			}
 		}
 		else
@@ -338,15 +427,15 @@ public class LEDGame : Sequence
 	//-----------------------------------------------------------------------------------
 	private void SetDefaults()
 	{
-		this.switch1 = 0x0D;
-		this.switch2 = 0x13;
-		this.switch3 = 0x10;
-		this.led1 = 0x1A;
-		this.led2 = 0x14;
-		this.led3 = 0x15;
-		this.speaker = 0x0C;
-		this.off = 0x01;
-		this.on = 0x00;
+		switch1 = 0x0D;
+		switch2 = 0x13;
+		switch3 = 0x10;
+		led1 = 0x1A;
+		led2 = 0x14;
+		led3 = 0x15;
+		speaker = 0x0C;
+		off = 0x01;
+		on = 0x00;
 	}
 	
 	
@@ -361,27 +450,126 @@ public class LEDGame : Sequence
 		/* Assign pin numbers */
 		try
 		{
-			this.switch1 = pinSettings[0];
-			this.switch2 = pinSettings[1];
-			this.switch3 = pinSettings[2];
-			this.led1 = pinSettings[3];
-			this.led2 = pinSettings[4];
-			this.led3 = pinSettings[5];
-			this.speaker = pinSettings[6];
-			this.off = pinSettings[7];
-			this.on = pinSettings[8];
+			switch1 = pinSettings[0];
+			switch2 = pinSettings[1];
+			switch3 = pinSettings[2];
+			led1 = pinSettings[3];
+			led2 = pinSettings[4];
+			led3 = pinSettings[5];
+			speaker = pinSettings[6];
+			off = pinSettings[7];
+			on = pinSettings[8];
 		}
 		catch (System.IndexOutOfRangeException)
 		{
-			this.switch1 = 0x0D;
-			this.switch2 = 0x13;
-			this.switch3 = 0x10;
-			this.led1 = 0x1A;
-			this.led2 = 0x14;
-			this.led3 = 0x15;
-			this.speaker = 0x0C;
-			this.off = 0x01;
-			this.on = 0x00;
+			switch1 = 0x0D;
+			switch2 = 0x13;
+			switch3 = 0x10;
+			led1 = 0x1A;
+			led2 = 0x14;
+			led3 = 0x15;
+			speaker = 0x0C;
+			off = 0x01;
+			on = 0x00;
 		}
+	}
+	
+	
+	//-----------------------------------------------------------------------------------
+	//  Loss method - Displays loss pattern and sounds
+	//       params:  none
+	//       return:  none
+	//-----------------------------------------------------------------------------------
+	public void Loss()
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			/* Play failure tone 1 */
+			SoftwareTones.Tones.SoftToneWrite(speaker, 104);
+			
+			/* Turn on LEDs */
+			WiringPi.GPIO.digitalWrite(led1, on);
+			WiringPi.GPIO.digitalWrite(led2, on);
+			WiringPi.GPIO.digitalWrite(led3, on);
+			
+			/* Delay */
+			try
+			{
+				WiringPi.Timing.delay(500);
+			}
+			catch (System.OverflowException)
+			{}
+
+			/* Play failure tone 1 */
+			SoftwareTones.Tones.SoftToneWrite(speaker, 156);
+			
+			/* Turn off LEDs */
+			WiringPi.GPIO.digitalWrite(led1, off);
+			WiringPi.GPIO.digitalWrite(led2, off);
+			WiringPi.GPIO.digitalWrite(led3, off);
+			
+			/* Delay */
+			try
+			{
+				WiringPi.Timing.delay(500);
+			}
+			catch (System.OverflowException)
+			{}
+		}
+		
+		/* Turn off speaker */
+		SoftwareTones.Tones.SoftToneWrite(speaker, 0);
+	}
+	
+	
+	//-----------------------------------------------------------------------------------
+	//  Win method - Displays win pattern and sounds
+	//       params:  none
+	//       return:  none
+	//-----------------------------------------------------------------------------------
+	public void Win()
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			/* Play failure tone 1 */
+			SoftwareTones.Tones.SoftToneWrite(speaker, 831);
+			
+			/* Turn on LEDs */
+			WiringPi.GPIO.digitalWrite(led1, on);
+			WiringPi.GPIO.digitalWrite(led2, off);
+			WiringPi.GPIO.digitalWrite(led3, off);
+			
+			/* Delay */
+			try
+			{
+				WiringPi.Timing.delay(500);
+			}
+			catch (System.OverflowException)
+			{}
+
+			/* Play failure tone 1 */
+			SoftwareTones.Tones.SoftToneWrite(speaker, 1245);
+			
+			/* Turn off LEDs */
+			WiringPi.GPIO.digitalWrite(led1, off);
+			WiringPi.GPIO.digitalWrite(led2, on);
+			WiringPi.GPIO.digitalWrite(led3, on);
+			
+			/* Delay */
+			try
+			{
+				WiringPi.Timing.delay(500);
+			}
+			catch (System.OverflowException)
+			{}
+		}
+		
+		/* Turn off LEDs */
+		WiringPi.GPIO.digitalWrite(led1, off);
+		WiringPi.GPIO.digitalWrite(led2, off);
+		WiringPi.GPIO.digitalWrite(led3, off);
+		
+		/* Turn off speaker */
+		SoftwareTones.Tones.SoftToneWrite(speaker, 0);
 	}
 }
