@@ -7,8 +7,8 @@
 
 Instructions
 
-	1. Place RPi.cs in the source directory.
-	2. Compile using the command 'mcs SimonSays.cs RPi.cs Sequence.cs LEDGame.cs'.
+	1. Place RPi.cs in the source directory as the other files.
+	2. Use the Makefile OR Compile using the command 'mcs SimonSays.cs RPi.cs SoftwareTones.cs Sequence.cs LEDGame.cs'.
 
 
 Game Mode Descriptions
@@ -20,7 +20,8 @@ Game Mode Descriptions
 Notes:
 
 	• The program must be run with root privileges.
-	• Only one-button mode functionality is complete at this time. One-button mode has been tested on the Raspberry Pi. Three-button mode will be added soon.
+	• Three-button mode is the current default. To use one-button mode, change line 43 of SimonSays.cs to 'LEDGame newGame = new LEDGame(10, 1,'.
+	• All code has been tested and is working, however, I assume no responsibility for any damage to your equipment. USE AT YOUR OWN RISK!
 
 
 Pin Numbering Explanation:
