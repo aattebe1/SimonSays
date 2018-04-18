@@ -2,7 +2,7 @@
 //  ECET 3710 - LEDGame
 //
 //  LED Game Class {LEDGame.cs}
-//  by Austin Atteberry, Reza Kamarjian, and Mark Brown
+//  by Austin Atteberry
 //
 //  This class extends the Sequence class. It provides the methods control the game.
 //
@@ -267,7 +267,7 @@ public class LEDGame : Sequence
 					debounce++;
 					
 					/* Check debounce */
-					if ((debounce >= 200) && (switchPressed == 0))
+					if ((debounce >= 700) && (switchPressed == 0))
 					{
 						/* Set switchPressed */
 						switchPressed = 1;
@@ -287,7 +287,7 @@ public class LEDGame : Sequence
 					debounce++;
 					
 					/* Check debounce */
-					if ((debounce >= 200) && (switchPressed == 0))
+					if ((debounce >= 700) && (switchPressed == 0))
 					{
 						/* Turn on LED */
 						WiringPi.GPIO.digitalWrite(led2, on);
@@ -307,7 +307,7 @@ public class LEDGame : Sequence
 					debounce++;
 					
 					/* Check debounce */
-					if ((debounce >= 200) && (switchPressed == 0))
+					if ((debounce >= 700) && (switchPressed == 0))
 					{
 						/* Turn on LED */
 						WiringPi.GPIO.digitalWrite(led3, on);
@@ -396,13 +396,13 @@ public class LEDGame : Sequence
 					}
 					else if (base.getSequence(i)[j] == 2)
 					{
-						System.Console.ForegroundColor = System.ConsoleColor.Blue;  // Set to LED color
-						System.Console.Write("Blue ");
+						System.Console.ForegroundColor = System.ConsoleColor.Green; // Set to LED color
+						System.Console.Write("Green ");
 					}
 					else
 					{
-						System.Console.ForegroundColor = System.ConsoleColor.Green; // Set to LED color
-						System.Console.Write("Green ");
+						System.Console.ForegroundColor = System.ConsoleColor.Blue; // Set to LED color
+						System.Console.Write("Blue ");
 					}
 				}
 				
@@ -483,10 +483,7 @@ public class LEDGame : Sequence
 	public void Loss()
 	{
 		for (int i = 0; i < 10; i++)
-		{
-			/* Play failure tone 1 */
-			SoftwareTones.Tones.SoftToneWrite(speaker, 104);
-			
+		{	
 			/* Turn on LEDs */
 			WiringPi.GPIO.digitalWrite(led1, on);
 			WiringPi.GPIO.digitalWrite(led2, on);
@@ -499,9 +496,6 @@ public class LEDGame : Sequence
 			}
 			catch (System.OverflowException)
 			{}
-
-			/* Play failure tone 1 */
-			SoftwareTones.Tones.SoftToneWrite(speaker, 156);
 			
 			/* Turn off LEDs */
 			WiringPi.GPIO.digitalWrite(led1, off);
@@ -516,9 +510,6 @@ public class LEDGame : Sequence
 			catch (System.OverflowException)
 			{}
 		}
-		
-		/* Turn off speaker */
-		SoftwareTones.Tones.SoftToneWrite(speaker, 0);
 	}
 	
 	
@@ -531,9 +522,6 @@ public class LEDGame : Sequence
 	{
 		for (int i = 0; i < 10; i++)
 		{
-			/* Play failure tone 1 */
-			SoftwareTones.Tones.SoftToneWrite(speaker, 831);
-			
 			/* Turn on LEDs */
 			WiringPi.GPIO.digitalWrite(led1, on);
 			WiringPi.GPIO.digitalWrite(led2, off);
@@ -546,9 +534,6 @@ public class LEDGame : Sequence
 			}
 			catch (System.OverflowException)
 			{}
-
-			/* Play failure tone 1 */
-			SoftwareTones.Tones.SoftToneWrite(speaker, 1245);
 			
 			/* Turn off LEDs */
 			WiringPi.GPIO.digitalWrite(led1, off);
@@ -568,8 +553,5 @@ public class LEDGame : Sequence
 		WiringPi.GPIO.digitalWrite(led1, off);
 		WiringPi.GPIO.digitalWrite(led2, off);
 		WiringPi.GPIO.digitalWrite(led3, off);
-		
-		/* Turn off speaker */
-		SoftwareTones.Tones.SoftToneWrite(speaker, 0);
 	}
 }
