@@ -2,7 +2,7 @@
 //  ECET 3710 - Sequence
 //
 //  Sequence Class {Sequence.cs}
-//  by Austin Atteberry, Reza Kamarjian, and Mark Brown
+//  by Austin Atteberry
 //
 //  This class defines a "Simon Says" type of sequence of patterns that increases in
 //  length with each iteration.
